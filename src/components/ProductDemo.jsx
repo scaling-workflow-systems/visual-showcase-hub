@@ -74,4 +74,3 @@ const ProductDemo = () => {
 };
 
 export default ProductDemo;
-
