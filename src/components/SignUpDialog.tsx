@@ -10,6 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
+import { loadStripe } from "@stripe/stripe-js";
+
+// Initialize Stripe
+const stripePromise = loadStripe("YOUR_PUBLISHABLE_KEY"); // Replace with your Stripe publishable key
 
 const SignUpDialog = ({
   isOpen,
@@ -22,23 +26,35 @@ const SignUpDialog = ({
 }) => {
   const { toast } = useToast();
   const [email, setEmail] = useState('');
+  const [cardNumber, setCardNumber] = useState('');
+  const [expiry, setExpiry] = useState('');
+  const [cvc, setCvc] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
   const [errors, setErrors] = useState({
-    email: ''
+    email: '',
+    cardNumber: '',
+    expiry: '',
+    cvc: ''
   });
 
   useEffect(() => {
     if (!isOpen) {
       setEmail('');
+      setCardNumber('');
+      setExpiry('');
+      setCvc('');
       setIsSubmitting(false);
-      setIsSuccess(false);
-      setErrors({ email: '' });
+      setErrors({ email: '', cardNumber: '', expiry: '', cvc: '' });
     }
   }, [isOpen]);
 
   const validateForm = () => {
-    const newErrors = { email: '' };
+    const newErrors = {
+      email: '',
+      cardNumber: '',
+      expiry: '',
+      cvc: ''
+    };
     let isValid = true;
 
     if (!email) {
@@ -46,6 +62,27 @@ const SignUpDialog = ({
       isValid = false;
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = 'Please enter a valid email';
+      isValid = false;
+    }
+
+    if (!cardNumber) {
+      newErrors.cardNumber = 'Card number is required';
+      isValid = false;
+    }
+
+    if (!expiry) {
+      newErrors.expiry = 'Expiry date is required';
+      isValid = false;
+    } else if (!/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(expiry)) {
+      newErrors.expiry = 'Invalid expiry date (MM/YY)';
+      isValid = false;
+    }
+
+    if (!cvc) {
+      newErrors.cvc = 'CVC is required';
+      isValid = false;
+    } else if (!/^[0-9]{3,4}$/.test(cvc)) {
+      newErrors.cvc = 'Invalid CVC';
       isValid = false;
     }
 
@@ -57,13 +94,18 @@ const SignUpDialog = ({
     if (validateForm()) {
       setIsSubmitting(true);
       try {
-        // For now, just simulate success since we're just collecting interest
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-        setIsSuccess(true);
-        toast({
-          title: "Interest Registered",
-          description: "We'll notify you when we launch!",
+        const response = await fetch("/api/create-payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
         });
+
+        const { url } = await response.json();
+        if (url) {
+          window.location.href = url;
+        } else {
+          throw new Error("No checkout URL received");
+        }
       } catch (error) {
         console.error("Error:", error);
         toast({
@@ -78,35 +120,6 @@ const SignUpDialog = ({
   };
 
   const planName = selectedPlan ? selectedPlan.name : 'Free Plan';
-
-  if (isSuccess) {
-    return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-md bg-[#1a1f2c] text-white">
-          <DialogHeader>
-            <DialogTitle className="text-center text-2xl">Thank You!</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col gap-6 py-6 text-center">
-            <p className="text-lg">
-              We've received your information for the {planName} plan.
-            </p>
-            <p className="text-gray-400">
-              Our service is coming soon! We'll email you according to standard FTC marketing rules when we're ready to launch.
-            </p>
-            <p className="text-gray-400">
-              We appreciate your interest and will reach out shortly with more details.
-            </p>
-            <Button
-              className="w-full bg-[#9333ea] hover:bg-[#7928ca] text-white py-6 text-lg mt-4"
-              onClick={onClose}
-            >
-              Close
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -130,9 +143,58 @@ const SignUpDialog = ({
             )}
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="cardNumber" className="text-gray-300">Card Number*</Label>
+            <Input
+              id="cardNumber"
+              type="text"
+              placeholder="1234 5678 9012 3456"
+              className="bg-[#2a2f3c] border-gray-700 text-white placeholder:text-gray-500"
+              value={cardNumber}
+              onChange={(e) => setCardNumber(e.target.value)}
+              maxLength={19}
+            />
+            {errors.cardNumber && (
+              <p className="text-sm text-red-500">{errors.cardNumber}</p>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="expiry" className="text-gray-300">Expiry (MM/YY)*</Label>
+              <Input
+                id="expiry"
+                type="text"
+                placeholder="MM/YY"
+                className="bg-[#2a2f3c] border-gray-700 text-white placeholder:text-gray-500"
+                value={expiry}
+                onChange={(e) => setExpiry(e.target.value)}
+                maxLength={5}
+              />
+              {errors.expiry && (
+                <p className="text-sm text-red-500">{errors.expiry}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cvc" className="text-gray-300">CVC*</Label>
+              <Input
+                id="cvc"
+                type="text"
+                placeholder="123"
+                className="bg-[#2a2f3c] border-gray-700 text-white placeholder:text-gray-500"
+                value={cvc}
+                onChange={(e) => setCvc(e.target.value)}
+                maxLength={4}
+              />
+              {errors.cvc && (
+                <p className="text-sm text-red-500">{errors.cvc}</p>
+              )}
+            </div>
+          </div>
+
           <p className="text-sm text-gray-400 text-center mt-2">
-            By submitting this form, you agree to share your email for marketing purposes. 
-            We'll notify you when we launch!
+            Your card won't be charged. We're just collecting interest for our upcoming launch!
           </p>
 
           <Button
