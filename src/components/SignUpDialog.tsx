@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import axios from 'axios';
 import {
   Dialog,
   DialogContent,
@@ -73,40 +73,26 @@ const SignUpDialog = ({
     if (validateForm()) {
       setIsSubmitting(true);
       try {
-        // Make API request to the FastAPI backend
-        const response = await fetch('http://localhost:8000/api/signup', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email,
-            cardNumber: cardNumber.replace(/\s/g, ''),
-            expiry,
-            cvc,
-            plan: selectedPlan ? selectedPlan.name : 'Free'
-          }),
+        const response = await axios.post('http://localhost:8000/api/signup', {
+          email,
+          cardNumber: cardNumber.replace(/\s/g, ''),
+          expiry,
+          cvc,
+          plan: selectedPlan ? selectedPlan.name : 'Free'
         });
 
-        if (response.ok) {
+        if (response.status === 200) {
           toast({
             title: "Success!",
             description: `You've successfully signed up for ${selectedPlan ? selectedPlan.name : 'our service'}.`,
           });
           onClose();
-        } else {
-          const errorData = await response.json();
-          toast({
-            title: "Error",
-            description: errorData.detail || "Something went wrong. Please try again.",
-            variant: "destructive"
-          });
         }
       } catch (error) {
         console.error("API error:", error);
         toast({
-          title: "Connection Error",
-          description: "Could not connect to server. Please try again later.",
+          title: "Error",
+          description: error.response?.data?.detail || "Something went wrong. Please try again.",
           variant: "destructive"
         });
       } finally {
