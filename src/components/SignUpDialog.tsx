@@ -1,5 +1,5 @@
+
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import {
   Dialog,
   DialogContent,
@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useToast } from "@/hooks/use-toast";
 
 const SignUpDialog = ({
   isOpen,
@@ -19,43 +20,25 @@ const SignUpDialog = ({
   onClose: () => void;
   selectedPlan: any;
 }) => {
+  const { toast } = useToast();
   const [email, setEmail] = useState('');
-  const [cardNumber, setCardNumber] = useState('');
-  const [expiry, setExpiry] = useState('');
-  const [cvc, setCvc] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errors, setErrors] = useState({
-    email: '',
-    cardNumber: '',
-    expiry: '',
-    cvc: ''
+    email: ''
   });
 
   useEffect(() => {
     if (!isOpen) {
       setEmail('');
-      setCardNumber('');
-      setExpiry('');
-      setCvc('');
       setIsSubmitting(false);
       setIsSuccess(false);
-      setErrors({
-        email: '',
-        cardNumber: '',
-        expiry: '',
-        cvc: ''
-      });
+      setErrors({ email: '' });
     }
   }, [isOpen]);
 
   const validateForm = () => {
-    const newErrors = {
-      email: '',
-      cardNumber: '',
-      expiry: '',
-      cvc: ''
-    };
+    const newErrors = { email: '' };
     let isValid = true;
 
     if (!email) {
@@ -63,21 +46,6 @@ const SignUpDialog = ({
       isValid = false;
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = 'Please enter a valid email';
-      isValid = false;
-    }
-
-    if (!cardNumber || cardNumber.length < 16) {
-      newErrors.cardNumber = 'Please enter a valid card number';
-      isValid = false;
-    }
-
-    if (!expiry || !/^\d{2}\/\d{2}$/.test(expiry)) {
-      newErrors.expiry = 'Please enter a valid expiry date (MM/YY)';
-      isValid = false;
-    }
-
-    if (!cvc || !/^\d{3,4}$/.test(cvc)) {
-      newErrors.cvc = 'Please enter a valid CVC';
       isValid = false;
     }
 
@@ -89,39 +57,26 @@ const SignUpDialog = ({
     if (validateForm()) {
       setIsSubmitting(true);
       try {
-        const response = await axios.post('http://localhost:8000/api/signup', {
-          email,
-          cardNumber: cardNumber.replace(/\s/g, ''),
-          expiry,
-          cvc,
-          plan: selectedPlan ? selectedPlan.name : 'Free'
+        // For now, just simulate success since we're just collecting interest
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+        setIsSuccess(true);
+        toast({
+          title: "Interest Registered",
+          description: "We'll notify you when we launch!",
         });
-
-        if (response.status === 200) {
-          setIsSuccess(true);
-        }
       } catch (error) {
-        console.error("API error:", error);
+        console.error("Error:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Something went wrong. Please try again.",
+        });
       } finally {
         setIsSubmitting(false);
       }
     }
   };
 
-  const formatCardNumber = (value: string) => {
-    const numbers = value.replace(/\D/g, '').slice(0, 16);
-    return numbers.replace(/(\d{4})/g, '$1 ').trim();
-  };
-
-  const formatExpiry = (value: string) => {
-    const numbers = value.replace(/\D/g, '').slice(0, 4);
-    if (numbers.length > 2) {
-      return `${numbers.slice(0, 2)}/${numbers.slice(2)}`;
-    }
-    return numbers;
-  };
-
-  const planPrice = selectedPlan ? selectedPlan.price : '$0.00';
   const planName = selectedPlan ? selectedPlan.name : 'Free Plan';
 
   if (isSuccess) {
@@ -157,7 +112,7 @@ const SignUpDialog = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md bg-[#1a1f2c] text-white">
         <DialogHeader>
-          <DialogTitle className="text-center text-2xl">Sign Up - {planName} ({planPrice})</DialogTitle>
+          <DialogTitle className="text-center text-2xl">Sign Up - {planName}</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4 py-4">
           <div className="space-y-2">
@@ -175,57 +130,9 @@ const SignUpDialog = ({
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="cardNumber" className="text-gray-300">Card Number*</Label>
-            <Input
-              id="cardNumber"
-              type="text"
-              placeholder="1234 5678 9012 3456"
-              className="bg-[#2a2f3c] border-gray-700 text-white placeholder:text-gray-500"
-              value={cardNumber}
-              onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
-            />
-            {errors.cardNumber && (
-              <p className="text-sm text-red-500">{errors.cardNumber}</p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="expiry" className="text-gray-300">Expiry*</Label>
-              <Input
-                id="expiry"
-                type="text"
-                placeholder="MM/YY"
-                className="bg-[#2a2f3c] border-gray-700 text-white placeholder:text-gray-500"
-                value={expiry}
-                onChange={(e) => setExpiry(formatExpiry(e.target.value))}
-                maxLength={5}
-              />
-              {errors.expiry && (
-                <p className="text-sm text-red-500">{errors.expiry}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="cvc" className="text-gray-300">CVC*</Label>
-              <Input
-                id="cvc"
-                type="text"
-                placeholder="123"
-                className="bg-[#2a2f3c] border-gray-700 text-white placeholder:text-gray-500"
-                value={cvc}
-                onChange={(e) => setCvc(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                maxLength={4}
-              />
-              {errors.cvc && (
-                <p className="text-sm text-red-500">{errors.cvc}</p>
-              )}
-            </div>
-          </div>
-
           <p className="text-sm text-gray-400 text-center mt-2">
             By submitting this form, you agree to share your email for marketing purposes. 
-            Payment processing is securely handled by Stripe.
+            We'll notify you when we launch!
           </p>
 
           <Button
