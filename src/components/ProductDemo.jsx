@@ -8,8 +8,24 @@ const ProductDemo = () => {
   const [mediaType, setMediaType] = useState('image');
   const [isPlaying, setIsPlaying] = useState(false);
 
+  // Example media URLs - replace these with your actual content
   const demoImage = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b";
-  const demoVideo = "https://www.w3schools.com/html/mov_bbb.mp4"; // Example video URL
+  const demoVideo = "https://www.w3schools.com/html/mov_bbb.mp4";
+
+  // Handle video play/pause
+  const togglePlayback = () => {
+    setIsPlaying(!isPlaying);
+    
+    // Get the video element and control it
+    const videoElement = document.querySelector('video');
+    if (videoElement) {
+      if (isPlaying) {
+        videoElement.pause();
+      } else {
+        videoElement.play();
+      }
+    }
+  };
 
   return (
     <div className="w-full max-w-5xl mx-auto mt-8 rounded-xl overflow-hidden bg-gray-900/50 backdrop-blur-sm border border-gray-800">
@@ -36,7 +52,7 @@ const ProductDemo = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setIsPlaying(!isPlaying)}
+            onClick={togglePlayback}
           >
             {isPlaying ? (
               <Pause className="w-4 h-4 mr-2" />
