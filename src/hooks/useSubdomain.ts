@@ -1,18 +1,14 @@
 
 const useSubdomain = () => {
-  // Get the full hostname (e.g., app.example.com)
   const hostname = window.location.hostname;
-  
-  // Split the hostname into parts
   const parts = hostname.split('.');
   
-  // If we're running locally, parts[0] will be 'localhost'
-  if (hostname === 'localhost') return 'main';
+  // For local development
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'main';
+  }
   
-  // In production, for a URL like 'app.example.com':
-  // parts[0] would be 'app'
-  // parts[1] would be 'example'
-  // parts[2] would be 'com'
+  // In production, return the first part of the hostname
   return parts[0];
 };
 
