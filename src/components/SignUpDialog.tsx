@@ -14,15 +14,18 @@ import { Label } from '@/components/ui/label';
 const SignUpDialog = ({
   isOpen,
   onClose,
+  selectedPlan
 }: {
   isOpen: boolean;
   onClose: () => void;
+  selectedPlan: any;
 }) => {
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvc, setCvc] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({
     email: '',
     cardNumber: '',
@@ -68,11 +71,47 @@ const SignUpDialog = ({
 
   const handleProceed = async () => {
     if (validateForm()) {
-      toast({
-        title: "Coming Soon!",
-        description: "Thank you for your interest. We'll notify you when we launch.",
-      });
-      onClose();
+      setIsSubmitting(true);
+      try {
+        // Make API request to the FastAPI backend
+        const response = await fetch('http://localhost:8000/api/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            cardNumber: cardNumber.replace(/\s/g, ''),
+            expiry,
+            cvc,
+            plan: selectedPlan ? selectedPlan.name : 'Free'
+          }),
+        });
+
+        if (response.ok) {
+          toast({
+            title: "Success!",
+            description: `You've successfully signed up for ${selectedPlan ? selectedPlan.name : 'our service'}.`,
+          });
+          onClose();
+        } else {
+          const errorData = await response.json();
+          toast({
+            title: "Error",
+            description: errorData.detail || "Something went wrong. Please try again.",
+            variant: "destructive"
+          });
+        }
+      } catch (error) {
+        console.error("API error:", error);
+        toast({
+          title: "Connection Error",
+          description: "Could not connect to server. Please try again later.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -89,11 +128,14 @@ const SignUpDialog = ({
     return numbers;
   };
 
+  const planPrice = selectedPlan ? selectedPlan.price : '$0.00';
+  const planName = selectedPlan ? selectedPlan.name : 'Free Plan';
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md bg-[#1a1f2c] text-white">
         <DialogHeader>
-          <DialogTitle className="text-center text-2xl">Sign Up - $0.00</DialogTitle>
+          <DialogTitle className="text-center text-2xl">Sign Up - {planName} ({planPrice})</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4 py-4">
           <div className="space-y-2">
@@ -167,8 +209,9 @@ const SignUpDialog = ({
           <Button
             className="w-full bg-[#9333ea] hover:bg-[#7928ca] text-white py-6 text-lg"
             onClick={handleProceed}
+            disabled={isSubmitting}
           >
-            Sign Up
+            {isSubmitting ? 'Processing...' : 'Sign Up'}
           </Button>
         </div>
       </DialogContent>

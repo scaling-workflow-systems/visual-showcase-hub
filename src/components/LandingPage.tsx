@@ -8,6 +8,7 @@ import subdomainConfig from '@/config/subdomainConfig';
 
 const LandingPage = () => {
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
   const { subdomain } = useSubdomainContext();
   
   // Get configuration for current subdomain, fallback to main if not found
@@ -18,6 +19,11 @@ const LandingPage = () => {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  const handlePlanSelect = (plan) => {
+    setSelectedPlan(plan);
+    setIsSignUpOpen(true);
   };
 
   return (
@@ -81,7 +87,8 @@ const LandingPage = () => {
             {config.pricing.tiers.map((tier, index) => (
               <div 
                 key={index} 
-                className={`bg-gray-900/50 p-6 rounded-xl border ${tier.highlighted ? 'border-purple-500' : 'border-gray-800'}`}
+                className={`bg-gray-900/50 p-6 rounded-xl border ${tier.highlighted ? 'border-purple-500' : 'border-gray-800'} cursor-pointer transition-all hover:border-purple-400 hover:shadow-lg`}
+                onClick={() => handlePlanSelect(tier)}
               >
                 <h3 className="text-xl font-bold mb-2">{tier.name}</h3>
                 <p className="text-3xl font-bold mb-4">{tier.price}<span className="text-sm text-gray-400">/month</span></p>
@@ -92,6 +99,10 @@ const LandingPage = () => {
                 </ul>
                 <Button 
                   className={`w-full ${tier.highlighted ? 'bg-gradient-to-r from-payment-purple to-payment-pink' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePlanSelect(tier);
+                  }}
                 >
                   {tier.cta}
                 </Button>
@@ -133,7 +144,8 @@ const LandingPage = () => {
 
       <SignUpDialog 
         isOpen={isSignUpOpen} 
-        onClose={() => setIsSignUpOpen(false)} 
+        onClose={() => setIsSignUpOpen(false)}
+        selectedPlan={selectedPlan}
       />
     </div>
   );
