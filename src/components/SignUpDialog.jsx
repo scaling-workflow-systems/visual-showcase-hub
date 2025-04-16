@@ -14,19 +14,9 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import CheckoutForm from './CheckoutForm';
 
-// Initialize Stripe with your publishable key
-// Using empty string as fallback to prevent crashes, but this will show a clear error message if key is missing
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "");
 
-const SignUpDialog = ({
-  isOpen,
-  onClose,
-  selectedPlan
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  selectedPlan: any;
-}) => {
+const SignUpDialog = ({ isOpen, onClose, selectedPlan }) => {
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,11 +30,9 @@ const SignUpDialog = ({
 
   const planName = selectedPlan ? selectedPlan.name : 'Free Plan';
 
-  // Options for the Elements provider
-  // Use an explicit type for mode to satisfy TypeScript
   const options = {
-    mode: 'payment' as const, // Using "as const" to make TypeScript treat this as a literal type
-    amount: selectedPlan?.price ? selectedPlan.price * 100 : 0, // convert to cents
+    mode: 'payment',
+    amount: selectedPlan?.price ? selectedPlan.price * 100 : 0,
     currency: 'usd',
     appearance: {
       theme: 'night',
