@@ -15,7 +15,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import CheckoutForm from './CheckoutForm';
 
 // Initialize Stripe with your publishable key
-const stripePromise = loadStripe(process.env.VITE_STRIPE_PUBLISHABLE_KEY || "");
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "");
 
 const SignUpDialog = ({
   isOpen,
