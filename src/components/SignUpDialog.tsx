@@ -41,8 +41,9 @@ const SignUpDialog = ({
   const planName = selectedPlan ? selectedPlan.name : 'Free Plan';
 
   // Options for the Elements provider
+  // Use an explicit type for mode to satisfy TypeScript
   const options = {
-    mode: 'payment',
+    mode: 'payment' as const, // Using "as const" to make TypeScript treat this as a literal type
     amount: selectedPlan?.price ? selectedPlan.price * 100 : 0, // convert to cents
     currency: 'usd',
     appearance: {
