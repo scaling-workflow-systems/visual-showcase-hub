@@ -22,6 +22,7 @@ const LandingPage = () => {
   };
 
   const handlePlanSelect = (plan) => {
+    console.log("Selected plan:", plan);
     setSelectedPlan(plan);
     setIsSignUpOpen(true);
   };
@@ -87,8 +88,9 @@ const LandingPage = () => {
             {config.pricing.tiers.map((tier, index) => (
               <div 
                 key={index} 
-                className={`bg-gray-900/50 p-6 rounded-xl border ${tier.highlighted ? 'border-purple-500' : 'border-gray-800'} cursor-pointer transition-all hover:border-purple-400 hover:shadow-lg`}
+                className={`bg-gray-900/50 p-6 rounded-xl border ${tier.highlighted ? 'border-purple-500' : 'border-gray-800'} transition-all hover:border-purple-400 hover:shadow-lg`}
                 onClick={() => handlePlanSelect(tier)}
+                style={{ cursor: 'pointer' }}
               >
                 <h3 className="text-xl font-bold mb-2">{tier.name}</h3>
                 <p className="text-3xl font-bold mb-4">{tier.price}<span className="text-sm text-gray-400">/month</span></p>
