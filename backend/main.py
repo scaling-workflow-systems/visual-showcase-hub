@@ -6,9 +6,10 @@ import re
 
 app = FastAPI()
 
+# Updated CORS configuration to handle all domains including subdomains
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with your actual domains
+    allow_origins=["*"],  # In production, you might want to be more specific
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
