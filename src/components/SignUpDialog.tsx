@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import axios from 'axios';
 import {
@@ -7,7 +8,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -20,12 +20,12 @@ const SignUpDialog = ({
   onClose: () => void;
   selectedPlan: any;
 }) => {
-  const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvc, setCvc] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [errors, setErrors] = useState({
     email: '',
     cardNumber: '',
@@ -82,19 +82,10 @@ const SignUpDialog = ({
         });
 
         if (response.status === 200) {
-          toast({
-            title: "Success!",
-            description: `You've successfully signed up for ${selectedPlan ? selectedPlan.name : 'our service'}.`,
-          });
-          onClose();
+          setIsSuccess(true);
         }
       } catch (error) {
         console.error("API error:", error);
-        toast({
-          title: "Error",
-          description: error.response?.data?.detail || "Something went wrong. Please try again.",
-          variant: "destructive"
-        });
       } finally {
         setIsSubmitting(false);
       }
@@ -116,6 +107,35 @@ const SignUpDialog = ({
 
   const planPrice = selectedPlan ? selectedPlan.price : '$0.00';
   const planName = selectedPlan ? selectedPlan.name : 'Free Plan';
+
+  if (isSuccess) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-md bg-[#1a1f2c] text-white">
+          <DialogHeader>
+            <DialogTitle className="text-center text-2xl">Thank You!</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-6 py-6 text-center">
+            <p className="text-lg">
+              We've received your information for the {planName} plan.
+            </p>
+            <p className="text-gray-400">
+              Our service is coming soon! We'll email you according to standard FTC marketing rules when we're ready to launch.
+            </p>
+            <p className="text-gray-400">
+              We appreciate your interest and will reach out shortly with more details.
+            </p>
+            <Button
+              className="w-full bg-[#9333ea] hover:bg-[#7928ca] text-white py-6 text-lg mt-4"
+              onClick={onClose}
+            >
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
