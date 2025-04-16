@@ -15,6 +15,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import CheckoutForm from './CheckoutForm';
 
 // Initialize Stripe with your publishable key
+// Using empty string as fallback to prevent crashes, but this will show a clear error message if key is missing
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "");
 
 const SignUpDialog = ({
@@ -39,6 +40,19 @@ const SignUpDialog = ({
 
   const planName = selectedPlan ? selectedPlan.name : 'Free Plan';
 
+  // Options for the Elements provider
+  const options = {
+    mode: 'payment',
+    amount: selectedPlan?.price ? selectedPlan.price * 100 : 0, // convert to cents
+    currency: 'usd',
+    appearance: {
+      theme: 'night',
+      variables: {
+        colorPrimary: '#9333ea',
+      },
+    },
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md bg-[#1a1f2c] text-white">
@@ -58,7 +72,7 @@ const SignUpDialog = ({
             />
           </div>
 
-          <Elements stripe={stripePromise}>
+          <Elements stripe={stripePromise} options={options}>
             <CheckoutForm email={email} setIsSubmitting={setIsSubmitting} />
           </Elements>
 
