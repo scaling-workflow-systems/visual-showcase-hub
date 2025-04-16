@@ -9,7 +9,6 @@ import App from "../pages/App";
 const SubdomainRouter = () => {
   const { subdomain } = useSubdomainContext();
 
-  // Render different content based on subdomain
   switch (subdomain) {
     case 'admin':
       return (
@@ -27,7 +26,6 @@ const SubdomainRouter = () => {
         </Routes>
       );
     
-    // Main domain or any other subdomain
     default:
       return (
         <Routes>

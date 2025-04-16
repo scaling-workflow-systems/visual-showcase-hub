@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Image as ImageIcon, Video, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const ProductDemo = () => {
-  const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
+  const [mediaType, setMediaType] = useState('image');
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (

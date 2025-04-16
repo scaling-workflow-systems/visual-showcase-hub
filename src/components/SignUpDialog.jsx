@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -11,13 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-const SignUpDialog = ({
-  isOpen,
-  onClose,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-}) => {
+const SignUpDialog = ({ isOpen, onClose }) => {
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [cardNumber, setCardNumber] = useState('');
@@ -76,12 +70,12 @@ const SignUpDialog = ({
     }
   };
 
-  const formatCardNumber = (value: string) => {
+  const formatCardNumber = (value) => {
     const numbers = value.replace(/\D/g, '').slice(0, 16);
     return numbers.replace(/(\d{4})/g, '$1 ').trim();
   };
 
-  const formatExpiry = (value: string) => {
+  const formatExpiry = (value) => {
     const numbers = value.replace(/\D/g, '').slice(0, 4);
     if (numbers.length > 2) {
       return `${numbers.slice(0, 2)}/${numbers.slice(2)}`;
