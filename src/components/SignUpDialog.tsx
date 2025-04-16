@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Mail, CreditCard } from 'lucide-react';
 
 const SignUpDialog = ({
   isOpen,
@@ -21,14 +20,25 @@ const SignUpDialog = ({
 }) => {
   const { toast } = useToast();
   const [email, setEmail] = useState('');
-  const [creditCard, setCreditCard] = useState('');
-  const [errors, setErrors] = useState({ email: '', creditCard: '' });
+  const [cardNumber, setCardNumber] = useState('');
+  const [expiry, setExpiry] = useState('');
+  const [cvc, setCvc] = useState('');
+  const [errors, setErrors] = useState({
+    email: '',
+    cardNumber: '',
+    expiry: '',
+    cvc: ''
+  });
 
   const validateForm = () => {
-    const newErrors = { email: '', creditCard: '' };
+    const newErrors = {
+      email: '',
+      cardNumber: '',
+      expiry: '',
+      cvc: ''
+    };
     let isValid = true;
 
-    // Email validation
     if (!email) {
       newErrors.email = 'Email is required';
       isValid = false;
@@ -37,12 +47,18 @@ const SignUpDialog = ({
       isValid = false;
     }
 
-    // Credit card validation (basic length check)
-    if (!creditCard) {
-      newErrors.creditCard = 'Credit card is required';
+    if (!cardNumber || cardNumber.length < 16) {
+      newErrors.cardNumber = 'Please enter a valid card number';
       isValid = false;
-    } else if (creditCard.length < 16) {
-      newErrors.creditCard = 'Please enter a valid credit card number';
+    }
+
+    if (!expiry || !/^\d{2}\/\d{2}$/.test(expiry)) {
+      newErrors.expiry = 'Please enter a valid expiry date (MM/YY)';
+      isValid = false;
+    }
+
+    if (!cvc || !/^\d{3,4}$/.test(cvc)) {
+      newErrors.cvc = 'Please enter a valid CVC';
       isValid = false;
     }
 
@@ -60,59 +76,99 @@ const SignUpDialog = ({
     }
   };
 
+  const formatCardNumber = (value: string) => {
+    const numbers = value.replace(/\D/g, '').slice(0, 16);
+    return numbers.replace(/(\d{4})/g, '$1 ').trim();
+  };
+
+  const formatExpiry = (value: string) => {
+    const numbers = value.replace(/\D/g, '').slice(0, 4);
+    if (numbers.length > 2) {
+      return `${numbers.slice(0, 2)}/${numbers.slice(2)}`;
+    }
+    return numbers;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-[#1a1f2c] text-white">
         <DialogHeader>
-          <DialogTitle className="text-center">Get Started Now</DialogTitle>
+          <DialogTitle className="text-center text-2xl">Sign Up - $0.00</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4 py-4">
-          <div className="text-center">
-            <div className="text-3xl font-bold mb-2">$0.00</div>
-            <div className="text-gray-400">No credit card required</div>
-          </div>
-          
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                className="pl-10"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
+            <Label htmlFor="email" className="text-gray-300">Email*</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="your@email.com"
+              className="bg-[#2a2f3c] border-gray-700 text-white placeholder:text-gray-500"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
             {errors.email && (
-              <p className="text-sm text-red-500 mt-1">{errors.email}</p>
+              <p className="text-sm text-red-500">{errors.email}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="creditCard">Credit Card</Label>
-            <div className="relative">
-              <CreditCard className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-              <Input
-                id="creditCard"
-                type="text"
-                placeholder="1234 5678 9012 3456"
-                className="pl-10"
-                value={creditCard}
-                onChange={(e) => setCreditCard(e.target.value.replace(/\D/g, '').slice(0, 16))}
-              />
-            </div>
-            {errors.creditCard && (
-              <p className="text-sm text-red-500 mt-1">{errors.creditCard}</p>
+            <Label htmlFor="cardNumber" className="text-gray-300">Card Number*</Label>
+            <Input
+              id="cardNumber"
+              type="text"
+              placeholder="1234 5678 9012 3456"
+              className="bg-[#2a2f3c] border-gray-700 text-white placeholder:text-gray-500"
+              value={cardNumber}
+              onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
+            />
+            {errors.cardNumber && (
+              <p className="text-sm text-red-500">{errors.cardNumber}</p>
             )}
           </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="expiry" className="text-gray-300">Expiry*</Label>
+              <Input
+                id="expiry"
+                type="text"
+                placeholder="MM/YY"
+                className="bg-[#2a2f3c] border-gray-700 text-white placeholder:text-gray-500"
+                value={expiry}
+                onChange={(e) => setExpiry(formatExpiry(e.target.value))}
+                maxLength={5}
+              />
+              {errors.expiry && (
+                <p className="text-sm text-red-500">{errors.expiry}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cvc" className="text-gray-300">CVC*</Label>
+              <Input
+                id="cvc"
+                type="text"
+                placeholder="123"
+                className="bg-[#2a2f3c] border-gray-700 text-white placeholder:text-gray-500"
+                value={cvc}
+                onChange={(e) => setCvc(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                maxLength={4}
+              />
+              {errors.cvc && (
+                <p className="text-sm text-red-500">{errors.cvc}</p>
+              )}
+            </div>
+          </div>
+
+          <p className="text-sm text-gray-400 text-center mt-2">
+            By submitting this form, you agree to share your email for marketing purposes. 
+            Payment processing is securely handled by Stripe.
+          </p>
 
           <Button
-            className="w-full bg-gradient-to-r from-payment-purple to-payment-pink hover:opacity-90"
+            className="w-full bg-[#9333ea] hover:bg-[#7928ca] text-white py-6 text-lg"
             onClick={handleProceed}
           >
-            Start Using NextPay
+            Sign Up
           </Button>
         </div>
       </DialogContent>
