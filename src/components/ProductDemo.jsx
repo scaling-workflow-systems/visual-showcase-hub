@@ -8,15 +8,12 @@ const ProductDemo = () => {
   const [mediaType, setMediaType] = useState('image');
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // Example media URLs - replace these with your actual content
-  const demoImage = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b";
-  const demoVideo = "https://www.w3schools.com/html/mov_bbb.mp4";
+  // Use the provided URL for both image and video
+  const demoUrl = "https://cloudinary-marketing-res.cloudinary.com/images/w_1000,c_scale/v1679921049/Image_URL_header/Image_URL_header-png?_i=AA";
 
-  // Handle video play/pause
   const togglePlayback = () => {
     setIsPlaying(!isPlaying);
     
-    // Get the video element and control it
     const videoElement = document.querySelector('video');
     if (videoElement) {
       if (isPlaying) {
@@ -67,7 +64,7 @@ const ProductDemo = () => {
         {mediaType === 'image' ? (
           <AspectRatio ratio={16 / 9}>
             <img
-              src={demoImage}
+              src={demoUrl}
               alt="Product demo"
               className="w-full h-full object-cover"
             />
@@ -75,7 +72,7 @@ const ProductDemo = () => {
         ) : (
           <AspectRatio ratio={16 / 9}>
             <video
-              src={demoVideo}
+              src={demoUrl}
               className="w-full h-full object-cover"
               controls={true}
               autoPlay={isPlaying}
