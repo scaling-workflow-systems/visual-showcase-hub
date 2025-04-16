@@ -1,10 +1,11 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import ProductDemo from '@/components/ProductDemo';
-import { Link } from 'react-router-dom';
+import SignUpDialog from '@/components/SignUpDialog';
 
 const Index = () => {
+  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+  
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
@@ -26,7 +27,10 @@ const Index = () => {
               <Button variant="ghost" onClick={() => scrollToSection('pricing')}>Pricing</Button>
               <Button variant="ghost" onClick={() => scrollToSection('solutions')}>Solutions</Button>
               <Button variant="ghost" onClick={() => scrollToSection('faq')}>FAQ</Button>
-              <Button className="bg-gradient-to-r from-payment-purple to-payment-pink hover:opacity-90">
+              <Button 
+                className="bg-gradient-to-r from-payment-purple to-payment-pink hover:opacity-90"
+                onClick={() => setIsSignUpOpen(true)}
+              >
                 Sign Up
               </Button>
             </div>
@@ -147,6 +151,11 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      <SignUpDialog 
+        isOpen={isSignUpOpen} 
+        onClose={() => setIsSignUpOpen(false)} 
+      />
     </div>
   );
 };
