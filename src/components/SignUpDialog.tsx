@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   Dialog,
@@ -32,6 +31,23 @@ const SignUpDialog = ({
     expiry: '',
     cvc: ''
   });
+
+  useEffect(() => {
+    if (!isOpen) {
+      setEmail('');
+      setCardNumber('');
+      setExpiry('');
+      setCvc('');
+      setIsSubmitting(false);
+      setIsSuccess(false);
+      setErrors({
+        email: '',
+        cardNumber: '',
+        expiry: '',
+        cvc: ''
+      });
+    }
+  }, [isOpen]);
 
   const validateForm = () => {
     const newErrors = {
