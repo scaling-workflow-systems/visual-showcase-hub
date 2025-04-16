@@ -1,11 +1,15 @@
 
 import { useState } from 'react';
-import { Image as ImageIcon, Video, Play } from 'lucide-react';
+import { Image as ImageIcon, Video, Play, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 const ProductDemo = () => {
   const [mediaType, setMediaType] = useState('image');
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const demoImage = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b";
+  const demoVideo = "https://www.w3schools.com/html/mov_bbb.mp4"; // Example video URL
 
   return (
     <div className="w-full max-w-5xl mx-auto mt-8 rounded-xl overflow-hidden bg-gray-900/50 backdrop-blur-sm border border-gray-800">
@@ -34,16 +38,40 @@ const ProductDemo = () => {
             size="sm"
             onClick={() => setIsPlaying(!isPlaying)}
           >
-            <Play className="w-4 h-4 mr-2" />
+            {isPlaying ? (
+              <Pause className="w-4 h-4 mr-2" />
+            ) : (
+              <Play className="w-4 h-4 mr-2" />
+            )}
             {isPlaying ? 'Pause' : 'Play'}
           </Button>
         )}
       </div>
-      <div className="aspect-video bg-gray-900/30 flex items-center justify-center">
-        <p className="text-gray-400">Drop your {mediaType} here or click to upload</p>
+      <div className="aspect-video bg-gray-900/30">
+        {mediaType === 'image' ? (
+          <AspectRatio ratio={16 / 9}>
+            <img
+              src={demoImage}
+              alt="Product demo"
+              className="w-full h-full object-cover"
+            />
+          </AspectRatio>
+        ) : (
+          <AspectRatio ratio={16 / 9}>
+            <video
+              src={demoVideo}
+              className="w-full h-full object-cover"
+              controls={true}
+              autoPlay={isPlaying}
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+            />
+          </AspectRatio>
+        )}
       </div>
     </div>
   );
 };
 
 export default ProductDemo;
+
